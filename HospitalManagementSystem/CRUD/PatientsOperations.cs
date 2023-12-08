@@ -88,7 +88,7 @@ namespace HospitalManagementSystem.CRUD
 
                     
                     context.SaveChanges();
-                    Console.WriteLine("Patient Deleted Successfully..")
+                    Console.WriteLine("Patient Deleted Successfully..");
                 }
             }
 
