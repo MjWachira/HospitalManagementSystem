@@ -6,7 +6,8 @@ class Program
 {
     static void Main()
     {
-        Console.WriteLine("Hospital Management System");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine("\n ##### HOSPITAL MANAGEMENT SYSTEM #####");
 
         DoctorOperations doctorOperations = new DoctorOperations();
         RoomOperations roomOperations = new RoomOperations();
@@ -17,7 +18,8 @@ class Program
 
         while (isRunning)
         {
-            Console.WriteLine("\n Manage");
+            Console.WriteLine("******** WELCOME BACK ********");
+            Console.WriteLine("********* MAIN MENU  *********");
             Console.WriteLine("\nChoose an option:");
             Console.WriteLine("1. Doctors");
             Console.WriteLine("2. Rooms");
