@@ -13,81 +13,117 @@ namespace HospitalManagementSystem.CRUD
     {
         public void AddDoctor()
         {
-            using (var context = new HospitalDBContext())
-            {
-                // Creating a new Doctor
-                var newDoctor = new Doctor
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                    DoctorName = "Dr. James",
-                    DocSpecialty = "Ears"
-                };
+                    Console.WriteLine("Enter Doctor Names");
+                    string docName = Console.ReadLine();
+                    Console.WriteLine("Enter Doctor Speciality");
+                    string docSpec = Console.ReadLine();
+                    var newDoctor = new Doctor
+                    {
+                        DoctorName = docName,
+                        DocSpecialty = docSpec
+                    };
 
-                // Add the new Doctor to the context
-                context.Doctors.Add(newDoctor);
-
-                Console.WriteLine(" Doctor Added Successfully...");
-                // Save changes to the database
-                context.SaveChanges();
+                    context.Doctors.Add(newDoctor);
+                    Console.WriteLine(" Doctor Added Successfully...");
+                    context.SaveChanges();
+                }
             }
+            catch(Exception ex) 
+            { Console.WriteLine(ex.Message); }
+            
 
         }
         public void ViewDoctors()
         {
-            using (var context = new HospitalDBContext())
-            {
-                // Retrieve a Doctor and their Appointments
-                var doctorWithAppointments = context.Doctors
-                    .Include(d => d.Appointments)
-                    .FirstOrDefault();
-
-                if (doctorWithAppointments != null)
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                    Console.WriteLine($"Doctor: {doctorWithAppointments.DoctorName}");
+                    var allDoctors = context.Doctors
+                        .Include(d => d.Appointments)
+                        .ToList();
 
-                    foreach (var appointment in doctorWithAppointments.Appointments)
+                    if (allDoctors.Count > 0)
                     {
-                        Console.WriteLine($"Appointment Date: {appointment.AppointmentDate}, Time: {appointment.AppointmentTime}");
+                        Console.WriteLine("All Doctors and Their Appointments:");
+
+                        foreach (var doctorWithAppointments in allDoctors)
+
+                        {
+                            Console.WriteLine($"Doctor ID: {doctorWithAppointments.DoctorID}");
+                            Console.WriteLine($"Doctor: {doctorWithAppointments.DoctorName}");
+
+                            foreach (var appointment in doctorWithAppointments.Appointments)
+                            {
+                                Console.WriteLine($"Appointment Date: {appointment.AppointmentDate}, Time: {appointment.AppointmentTime}");
+                            }
+
+                            Console.WriteLine();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No doctors found in the database.");
                     }
                 }
-            }
-          
+             }catch(Exception ex) { Console.WriteLine($"Error occored due to{ ex.Message}"); }
+
+            
         }
+
         public void UpdateDoctor() 
         {
-            using (var context = new HospitalDBContext())
-            {
-                // Find a Doctor by ID
-                var doctorToUpdate = context.Doctors.Find(1);
-
-                if (doctorToUpdate != null)
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                    // Update properties
-                    doctorToUpdate.DoctorName = "Dr. Jane";
-                    doctorToUpdate.DocSpecialty = "Skin";
-                    Console.WriteLine("Doctor Updated Successfully...");
-                    // Save changes to the database
-                    context.SaveChanges();
-                }
-            }
+                    ViewDoctors();
+                    Console.WriteLine("Enter Doctor ID yo want to update");
+                    int docID = int.Parse(Console.ReadLine());
+                    var doctorToUpdate = context.Doctors.Find(docID);
 
+                    Console.WriteLine("Enter Doctor Names");
+                    string docName = Console.ReadLine();
+                    Console.WriteLine("Enter Doctor Speciality");
+                    string docSpec = Console.ReadLine();
+
+                    if (doctorToUpdate != null)
+                    {
+
+                        doctorToUpdate.DoctorName = docName;
+                        doctorToUpdate.DocSpecialty = docSpec;
+                        Console.WriteLine("Doctor Updated Successfully...");
+                        context.SaveChanges();
+                    }
+                }
+
+
+            }
+            catch (Exception ex) { Console.WriteLine($"Error occored due to{ex.Message}"); }
+            
         }
         public void DeleteDoctor()
         {
-            using (var context = new HospitalDBContext())
-            {
-                // Find a Doctor by ID
-                var doctorToDelete = context.Doctors.Find(3);
-
-                if (doctorToDelete != null)
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                    // Remove the Doctor from the context
-                    context.Doctors.Remove(doctorToDelete);
+                    ViewDoctors();
+                    Console.WriteLine("Enter Doctor ID yo want to delete");
+                    int docID = int.Parse(Console.ReadLine());
 
-                    // Save changes to the database
-                    Console.WriteLine("Doctor deleted successfully...");
-                    context.SaveChanges();
+                    var doctorToDelete = context.Doctors.Find(docID);
+
+                    if (doctorToDelete != null)
+                    {
+                        context.Doctors.Remove(doctorToDelete);
+                        Console.WriteLine("Doctor deleted successfully...");
+                        context.SaveChanges();
+                    }
                 }
-            }
+
+            } catch (Exception ex) { Console.WriteLine($"Error occored due to{ex.Message}"); }
+           
 
         }
 

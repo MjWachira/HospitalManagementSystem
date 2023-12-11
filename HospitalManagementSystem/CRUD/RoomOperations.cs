@@ -12,83 +12,122 @@ namespace HospitalManagementSystem.CRUD
     {
         public void AddRoom()
         {
-            using (var context = new HospitalDBContext())
-            {
-
-                var newRoom = new Room
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                    RoomNumber = "101",
-                    RoomType = "Standard"
-                };
+                    Console.WriteLine("Enter Room Numer");
+                    string rmNum = Console.ReadLine();
+                    Console.WriteLine("Enter Room Type");
+                    string rmType = Console.ReadLine();
+
+                    var newRoom = new Room
+                    {
+                        // RoomID=0,
+                        RoomNumber = rmNum,
+                        RoomType = rmType
+                    };
 
 
-                context.Rooms.Add(newRoom);
+                    context.Rooms.Add(newRoom);
 
-                
-                context.SaveChanges();
-                Console.WriteLine("Room added successfully");
-            }
+
+                    context.SaveChanges();
+                    Console.WriteLine("Room added successfully");
+                }
+            } catch (Exception ex) { Console.WriteLine($"Error occored due to{ex.Message}"); }
+            
 
         }
         public void ViewRooms()
         {
-            using (var context = new HospitalDBContext())
-            {
-                
-                var roomDetails = context.Rooms
-                    .Include(r => r.Patients)
-                    .FirstOrDefault();
-
-                if (roomDetails != null)
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                    Console.WriteLine($"Room ID: {roomDetails.RoomID}");
-                    Console.WriteLine($"Room Number: {roomDetails.RoomNumber}");
-                    Console.WriteLine($"Room Type: {roomDetails.RoomType}");
+                    var allRooms = context.Rooms
+                        .Include(r => r.Patients)
+                        .ToList();
 
-                    foreach (var patient in roomDetails.Patients)
+                    if (allRooms.Count > 0)
                     {
-                        Console.WriteLine($"Patient: {patient.FirstName} {patient.LastName}");
+                        Console.WriteLine("All Rooms and Their Patients:");
+
+                        foreach (var roomDetails in allRooms)
+                        {
+                            Console.WriteLine($"Room ID: {roomDetails.RoomID}");
+                            Console.WriteLine($"Room Number: {roomDetails.RoomNumber}");
+                            Console.WriteLine($"Room Type: {roomDetails.RoomType}");
+                            Console.WriteLine();
+                            foreach (var patient in roomDetails.Patients)
+                            {
+                                Console.WriteLine($"Patient: {patient.FirstName} {patient.LastName}");
+                            }
+
+                            Console.WriteLine();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No rooms found in the database.");
                     }
                 }
-            }
-
+            } catch (Exception ex) { Console.WriteLine($"Error occored due to{ex.Message}"); }
+            
         }
+
         public void UpdateRoom()
         {
-            using (var context = new HospitalDBContext())
-            {
-               
-                var roomToUpdate = context.Rooms.Find(1);
-
-                if (roomToUpdate != null)
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                   
-                    roomToUpdate.RoomNumber = "102";
-                    roomToUpdate.RoomType = "ICU";
+                    ViewRooms();
+                    Console.WriteLine("Enter room Id you wan to update");
+                    int rmID = int.Parse(Console.ReadLine());
+                    var roomToUpdate = context.Rooms.Find(rmID);
 
-                   
-                    context.SaveChanges();
-                    Console.WriteLine("room updated successfully");
+                    Console.WriteLine("Enter Room Numer");
+                    string rmNum = Console.ReadLine();
+                    Console.WriteLine("Enter Room Type");
+                    string rmType = Console.ReadLine();
+
+
+                    if (roomToUpdate != null)
+                    {
+
+                        roomToUpdate.RoomNumber = rmNum;
+                        roomToUpdate.RoomType = rmType;
+
+
+                        context.SaveChanges();
+                        Console.WriteLine("room updated successfully");
+                    }
                 }
-            }
+            } catch (Exception ex) { Console.WriteLine($"Error occored due to{ex.Message}"); }
+            
 
         } public void DeleteRoom()
         {
-            using (var context = new HospitalDBContext())
-            {
-               
-                var roomToDelete = context.Rooms.Find(2);
-
-                if (roomToDelete != null)
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                   
-                    context.Rooms.Remove(roomToDelete);
+                    ViewRooms();
+                    Console.WriteLine("Enter room Id you wan to delete");
+                    int rmID = int.Parse(Console.ReadLine());
+                    var roomToDelete = context.Rooms.Find(rmID);
 
-                   
-                    context.SaveChanges();
-                    Console.WriteLine("deleted successfully....");
+                    if (roomToDelete != null)
+                    {
+
+                        context.Rooms.Remove(roomToDelete);
+
+
+                        context.SaveChanges();
+                        Console.WriteLine("deleted successfully....");
+                    }
+                    
                 }
-            }
+
+            } catch (Exception ex) { Console.WriteLine($"Error occored due to{ex.Message}"); }
+            
 
         }
     }

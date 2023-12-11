@@ -12,84 +12,160 @@ namespace HospitalManagementSystem.CRUD
     {
         public void MakeAppointment()
         {
-            using (var context = new HospitalDBContext())
-            {
-               
-                var newAppointment = new Appointment
+            try {
+                DoctorOperations doctorOperations = new DoctorOperations();
+                doctorOperations.ViewDoctors();
+                PatientsOperations patientsOperations = new PatientsOperations();
+                patientsOperations.ViewPatients();
+                Console.WriteLine("To Make Appointment::");
+
+                Console.WriteLine("Enter Doctor ID");
+                int docID = int.Parse(Console.ReadLine());
+
+                Console.WriteLine("Enter Patient ID");
+                int patID = int.Parse(Console.ReadLine());
+                using (var context = new HospitalDBContext())
                 {
-                    AppointmentDate = new DateOnly(2023, 12, 15),
-                    AppointmentTime = new TimeOnly(11, 30),
-                    PatientID = 1, 
-                    DoctorID = 1   
-                };
-                   
-                context.Appointments.Add(newAppointment);
 
-                
-                context.SaveChanges();
+                    var selectedDoctor = context.Doctors.FirstOrDefault(d => d.DoctorID == docID);
+                    var selectedPatient = context.Patients.FirstOrDefault(p => p.PatientID == patID);
 
-                Console.WriteLine("Appointment Added Successfully...");
-            }
+                    if (selectedDoctor != null && selectedPatient != null)
+                    {
+                        var newAppointment = new Appointment
+                        {
+                            AppointmentDate = new DateOnly(2023, 12, 15),
+                            AppointmentTime = new TimeOnly(11, 30),
+                            PatientID = patID,
+                            DoctorID = docID
+                        };
 
+                        context.Appointments.Add(newAppointment);
+
+
+                        context.SaveChanges();
+
+                        Console.WriteLine("Appointment Added Successfully...");
+                    }
+                    else
+                    {
+                        Console.WriteLine("not completed becouse the IDs do not exsist...");
+                    }
+                }
+            } catch (Exception ex) { Console.WriteLine($"Error occored due to {ex.Message}"); }
+      
         }
         public void ViewAppointments()
         {
-            using (var context = new HospitalDBContext())
-            {
-                
-                var appointmentDetails = context.Appointments
-                    .Include(a => a.Patient)
-                    .Include(a => a.Doctor)
-                    .FirstOrDefault();
-
-                if (appointmentDetails != null)
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                    Console.WriteLine($"Appointment ID: {appointmentDetails.AppointmentID}");
-                    Console.WriteLine($"Date: {appointmentDetails.AppointmentDate}, Time: {appointmentDetails.AppointmentTime}");
-                    Console.WriteLine($"Patient: {appointmentDetails.Patient.FirstName} {appointmentDetails.Patient.LastName}");
-                    Console.WriteLine($"Doctor: {appointmentDetails.Doctor.DoctorName}");
-                }
-            }
+                    var allAppointments = (from appointment in context.Appointments
+                                           join patient in context.Patients on appointment.PatientID equals patient.PatientID
+                                           join doctor in context.Doctors on appointment.DoctorID equals doctor.DoctorID
+                                           select new
+                                           {
+                                               Appointment = appointment,
+                                               Patient = patient,
+                                               Doctor = doctor
+                                           })
+                                          .ToList();
 
+                    if (allAppointments.Count > 0)
+                    {
+                        Console.WriteLine("All Appointments:");
+
+                        foreach (var appointmentInfo in allAppointments)
+                        {
+                            var appointmentDetails = appointmentInfo.Appointment;
+                            var patientDetails = appointmentInfo.Patient;
+                            var doctorDetails = appointmentInfo.Doctor;
+
+                            Console.WriteLine($"Appointment ID: {appointmentDetails.AppointmentID}");
+                            Console.WriteLine($"Date: {appointmentDetails.AppointmentDate}, Time: {appointmentDetails.AppointmentTime}");
+                            Console.WriteLine($"Patient: {patientDetails.FirstName} {patientDetails.LastName}");
+                            Console.WriteLine($"Doctor: {doctorDetails.DoctorName}");
+
+                            Console.WriteLine();
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No appointments found in the database.");
+                    }
+                }
+
+            } catch (Exception ex) { Console.WriteLine($"Error occored due to{ex.Message}"); }
+            
         }
+
         public void UpdateAppointment()
         {
-            using (var context = new HospitalDBContext())
-            {
-                
-                var appointmentToUpdate = context.Appointments.Find(1);
-
-                if (appointmentToUpdate != null)
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                    
-                    appointmentToUpdate.AppointmentDate = new DateOnly(2023, 12, 20);
-                    appointmentToUpdate.AppointmentTime = new TimeOnly(14, 45);
+                    ViewAppointments();
+                    DoctorOperations doctorOperations = new DoctorOperations();
+                    doctorOperations.ViewDoctors();
+                    PatientsOperations patientsOperations = new PatientsOperations();
+                    patientsOperations.ViewPatients();
+                    Console.WriteLine("Enter Appointment ID to Update");
+                    int appID = int.Parse(Console.ReadLine());
 
-                 
-                    context.SaveChanges();
-                    Console.WriteLine("Appointment  wass Updated ....");
+                    var appointmentToUpdate = context.Appointments.Find(appID);
+
+                    Console.WriteLine("Enter Doctor ID");
+                    int docID = int.Parse(Console.ReadLine());
+
+                    Console.WriteLine("Enter Patient ID");
+                    int patID = int.Parse(Console.ReadLine());
+
+                    if (appointmentToUpdate != null)
+                    {
+
+                        appointmentToUpdate.AppointmentDate = new DateOnly(2023, 12, 20);
+                        appointmentToUpdate.AppointmentTime = new TimeOnly(14, 45);
+                        appointmentToUpdate.PatientID = patID;
+                        appointmentToUpdate.DoctorID = docID;
+
+
+                        context.SaveChanges();
+                        Console.WriteLine("Appointment  wass Updated ....");
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID not found");
+                    }
                 }
-            }
+            } catch (Exception ex) { Console.WriteLine($"Error occored due to{ex.Message}"); }
+            
 
 
         }
         public void DeleteAppointment()
         {
-            using (var context = new HospitalDBContext())
-            {
-                
-                var appointmentToDelete = context.Appointments.Find(2);
-
-                if (appointmentToDelete != null)
+            try {
+                using (var context = new HospitalDBContext())
                 {
-                    
-                    context.Appointments.Remove(appointmentToDelete);
+                    Console.WriteLine("Enter Appointment ID to delete");
+                    int appID = int.Parse(Console.ReadLine());
+                    var appointmentToDelete = context.Appointments.Find(appID);
 
-                    
-                    context.SaveChanges();
-                    Console.WriteLine("Appointment was deleted...");
+                    if (appointmentToDelete != null)
+                    {
+
+                        context.Appointments.Remove(appointmentToDelete);
+
+                        context.SaveChanges();
+                        Console.WriteLine("Appointment was deleted...");
+                    }
+                    else
+                    {
+                        Console.WriteLine("ID not found");
+                    }
                 }
-            }
+            } catch (Exception ex) { Console.WriteLine($"Error occored due to{ex.Message}"); }
+            
 
         }
     }
